@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { login } from './api';
+import { Routes, Route } from 'react-router-dom';
 import EventList from './EventList';
+import SeatMap from './SeatMap';
 
 function App() {
   const [email, setEmail] = useState('');
@@ -36,7 +38,10 @@ function App() {
     return (<div>
       <p>Logged in! Token: {token.substring(0, 20)}...</p>
       <button onClick={handleLogout}>Log Out</button>
-      <EventList />
+      <Routes>
+        <Route path="/" element={<EventList />}></Route>
+        <Route path="/events/:id" element={<SeatMap />}></Route>
+      </Routes>
     </div>);
   }
 

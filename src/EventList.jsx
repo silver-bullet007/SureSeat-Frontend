@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { getEvents } from "./api";
-n
+import { Link } from 'react-router-dom';
 
 function EventList() {
 
@@ -36,7 +36,10 @@ function EventList() {
             <ul>
                 {events.map((event) => (
                     <li key={event.id}>
-                        <strong>{event.title}</strong> — {event.venue}
+                        <Link to={`/events/${event.id}`}>
+                            <strong>{event.title}</strong>
+                        </Link>
+                        {' '}— {event.venue}
                         <br />
                         {event.availableSeats} / {event.totalSeats} seats available
                     </li>

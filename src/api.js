@@ -39,3 +39,30 @@ export async function getEvents() {
 
     return response.json();
 }
+
+export async function getSeats(eventId) {
+    const response = await fetch(`${BASE_URL}/events/${eventId}/seats`);
+
+    if (!response.ok) {
+        throw new Error('Failed to load seats');
+    }
+    return response.json();
+}
+
+export async function holdSeat(seatId, token) {
+    const response = await fetch(`${BASE_URL}/bookings/hold`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ seatId })
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to hold seat');
+    }
+
+    return response.json();
+}
