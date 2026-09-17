@@ -15,10 +15,17 @@ function SeatMap() {
 
     useEffect(() => {
         async function getAllSeats() {
-            setMessage('');
             try {
                 const data = await getSeats(id);
                 setSeats(data);
+                if (heldSeatId) {
+                    const currSeat = data.find((s) => s.id === heldSeatId)
+                    if (currSeat && currSeat.status !== 'HELD') {
+                        setMessage('');
+                        setHeldSeatId(null);
+                        setHeldBookingId(null);
+                    }
+                }
             }
             catch (err) {
                 setError(err.message);
@@ -26,21 +33,13 @@ function SeatMap() {
             finally {
                 setLoading(false);
             }
-            if (heldSeatId) {
-                const currSeat = data.find((s) => s.id === heldSeatId)
-                if (currSeat && currSeat.status !== 'HELD') {
-                    setMessage('');
-                    setHeldSeatId(null);
-                    setHeldBookingId(null);
-                }
-            }
         }
         getAllSeats();
 
         const timerId = setInterval(getAllSeats, 5000);
 
         return (() => clearInterval(timerId));
-    }, [id]);
+    }, [id, heldSeatId]);
 
     async function handleClick(seatId) {
         setMessage('');
@@ -50,11 +49,12 @@ function SeatMap() {
             const result = await holdSeat(seatId, token);
             setMessage(`Held Seat !! Expires at ${result.expiresAt}`);
             setHeldSeatId(seatId);
+            setHeldBookingId(result.id);
             const updated = await getSeats(id);
             setSeats(updated);
         }
         catch (err) {
-            setError(err.messsage);
+            setError(err.message);
         }
 
     }
