@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { login } from './api';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useNavigate } from 'react-router-dom';
 import EventList from './EventList';
 import SeatMap from './SeatMap';
 
@@ -9,6 +9,7 @@ function App() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [token, setToken] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
@@ -32,6 +33,7 @@ function App() {
   function handleLogout() {
     localStorage.removeItem(null);
     setToken(null);
+    navigate('/');
   }
 
   if (token) {

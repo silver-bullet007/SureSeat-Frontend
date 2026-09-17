@@ -9,10 +9,12 @@ function SeatMap() {
     const [error, setError] = useState('');
     const [seats, setSeats] = useState([]);
     const [message, setMessage] = useState('');
+    const [heldSeatId, setHeldSeatId] = useState('');
     const { id } = useParams();
 
     useEffect(() => {
         async function getAllSeats() {
+            setMessage('');
             try {
                 const data = await getSeats(id);
                 setSeats(data);
@@ -22,6 +24,13 @@ function SeatMap() {
             }
             finally {
                 setLoading(false);
+            }
+            if (heldSeatId) {
+                const currSeat = data.find((s) => s.id === heldSeatId)
+                if (currSeat && currSeat.status !== 'HELD') {
+                    setMessage('');
+                    setHeldSeatId(null);
+                }
             }
         }
         getAllSeats();
@@ -38,6 +47,7 @@ function SeatMap() {
         try {
             const result = await holdSeat(seatId, token);
             setMessage(`Held Seat !! Expires at ${result.expiresAt}`);
+            setHeldSeatId(seatId);
             const updated = await getSeats(id);
             setSeats(updated);
         }
