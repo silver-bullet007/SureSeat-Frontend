@@ -22,7 +22,7 @@ function App() {
     setError('');
     try {
       const result = await login(email, password);
-      localStorage.setItem('token', result);
+      localStorage.setItem('token', result.token);
       setToken(result.token);
     } catch (err) {
       setError(err.message);

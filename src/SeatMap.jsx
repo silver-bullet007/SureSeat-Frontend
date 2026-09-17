@@ -30,7 +30,7 @@ function SeatMap() {
     async function handleClick(seatId) {
         setMessage('');
         setError('');
-        const token = localStorage.getItem(token);
+        const token = localStorage.getItem('token');
         try {
             const result = await holdSeat(seatId, token);
             setMessage(`Held Seat !! Expires at ${result.expiresAt}`);
