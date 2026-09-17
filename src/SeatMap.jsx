@@ -25,6 +25,10 @@ function SeatMap() {
             }
         }
         getAllSeats();
+
+        const timerId = setInterval(getAllSeats, 5000);
+
+        return (() => clearInterval(timerId));
     }, [id]);
 
     async function handleClick(seatId) {
