@@ -62,6 +62,9 @@ function App() {
         {error && <p style={{ color: 'red' }}>{error}</p>}
         <button type="submit">Log In</button>
       </form>
+      <p style={{ marginTop: 10, color: 'gray' }}>
+        Demo account: demo@seatsure.com / demo1234
+      </p>
     </div>
   );
 }
