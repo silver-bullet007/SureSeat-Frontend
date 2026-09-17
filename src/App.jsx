@@ -18,7 +18,7 @@ function App() {
     const storedRole = localStorage.getItem('role');
     if (storedToken) {
       setToken(storedToken);
-      setRole(storeRole);
+      setRole(storedRole);
     }
   }, []);
 
