@@ -82,3 +82,39 @@ export async function confirmBooking(bookingId, token) {
 
     return response.json();
 }
+
+export async function createEvent(eventData, token) {
+    const response = await fetch(`${BASE_URL}/events`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(eventData),
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to create event');
+    }
+
+    return response.json();
+}
+
+export async function addSeats(eventId, seatNumbers, token) {
+    const response = await fetch(`${BASE_URL}/events/${eventId}/seats`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ seatNumbers }),
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to add seats');
+    }
+
+    return response.json();
+}
