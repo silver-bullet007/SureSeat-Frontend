@@ -66,3 +66,19 @@ export async function holdSeat(seatId, token) {
 
     return response.json();
 }
+
+export async function confirmBooking(bookingId, token) {
+    const response = await fetch(`${BASE_URL}/bookings/${bookingId}/confirm`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+        },
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to confirm booking');
+    }
+
+    return response.json();
+}

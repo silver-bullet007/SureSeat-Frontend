@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { getSeats, holdSeat } from './api';
+import { getSeats, holdSeat, confirmBooking } from './api';
 
 
 
@@ -9,7 +9,8 @@ function SeatMap() {
     const [error, setError] = useState('');
     const [seats, setSeats] = useState([]);
     const [message, setMessage] = useState('');
-    const [heldSeatId, setHeldSeatId] = useState('');
+    const [heldSeatId, setHeldSeatId] = useState(null);
+    const [heldBookingId, setHeldBookingId] = useState(null);
     const { id } = useParams();
 
     useEffect(() => {
@@ -30,6 +31,7 @@ function SeatMap() {
                 if (currSeat && currSeat.status !== 'HELD') {
                     setMessage('');
                     setHeldSeatId(null);
+                    setHeldBookingId(null);
                 }
             }
         }
@@ -57,6 +59,21 @@ function SeatMap() {
 
     }
 
+    async function handleConfirm() {
+        setError('');
+        const token = localStorage.getItem('token');
+        try {
+            await confirmBooking(heldBookingId, token);
+            setMessage('Booking confirmed!');
+            setHeldSeatId(null);
+            setHeldBookingId(null);
+            const updated = await getSeats(id);
+            setSeats(updated);
+        } catch (err) {
+            setError(err.message);
+        }
+    }
+
     if (loading) return <p>Loading Seats...</p>
 
     return (
@@ -64,6 +81,7 @@ function SeatMap() {
             <h2>Seats for Event {id}</h2>
             {message && <p style={{ color: 'green' }}>{message}</p>}
             {error && <p style={{ color: 'red' }}>{error}</p>}
+            {heldSeatId && <button onClick={handleConfirm}>Confirm Booking</button>}
             <div>
                 {seats.map((seat) => (<button key={seat.id} disabled={seat.status !== 'AVAILABLE'} onClick={() => handleClick(seat.id)} >
                     {seat.seatNumber} ({seat.status})
