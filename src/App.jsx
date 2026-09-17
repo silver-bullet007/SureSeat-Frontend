@@ -9,12 +9,15 @@ function App() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [token, setToken] = useState(null);
+  const [role, setRole] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
+    const storedRole = localStorage.getItem('role');
     if (storedToken) {
       setToken(storedToken);
+      setRole(storeRole);
     }
   }, []);
 
@@ -24,15 +27,19 @@ function App() {
     try {
       const result = await login(email, password);
       localStorage.setItem('token', result.token);
+      localStorage.setItem('role', result.role);
       setToken(result.token);
+      setRole(result.role);
     } catch (err) {
       setError(err.message);
     }
   }
 
   function handleLogout() {
-    localStorage.removeItem(null);
+    localStorage.removeItem('token');
+    localStorage.removeItem('role');
     setToken(null);
+    setRole(null);
     navigate('/');
   }
 
