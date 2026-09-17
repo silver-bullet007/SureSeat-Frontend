@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { login } from './api';
-import { Routes, Route, useNavigate } from 'react-router-dom';
+import { Routes, Route, useNavigate, Link } from 'react-router-dom';
 import EventList from './EventList';
 import SeatMap from './SeatMap';
+import CreateEvent from './CreateEvent';
 
 function App() {
   const [email, setEmail] = useState('');
@@ -47,9 +48,13 @@ function App() {
     return (<div>
       <p>Logged in! Token: {token.substring(0, 20)}...</p>
       <button onClick={handleLogout}>Log Out</button>
+      {(role === 'ORGANIZER' || role === 'ADMIN') && (
+        <Link to="/create-event">Create Event</Link>
+      )}
       <Routes>
-        <Route path="/" element={<EventList />}></Route>
-        <Route path="/events/:id" element={<SeatMap />}></Route>
+        <Route path="/" element={<EventList />} />
+        <Route path="/events/:id" element={<SeatMap />} />
+        <Route path="/create-event" element={<CreateEvent />} />
       </Routes>
     </div>);
   }
