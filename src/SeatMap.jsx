@@ -9,6 +9,9 @@ function SeatMap() {
     const [message, setMessage] = useState('');
     const [heldSeatId, setHeldSeatId] = useState(null);
     const [heldBookingId, setHeldBookingId] = useState(null);
+    const [demoRunning, setDemoRunning] = useState(false);
+    const [demoPanels, setDemoPanels] = useState(null);
+    const [showTechNotes, setShowTechNotes] = useState(false);
     const { id } = useParams();
 
     useEffect(() => {
@@ -53,6 +56,42 @@ function SeatMap() {
         }
     }
 
+    async function handleConcurrencyDemo() {
+        const availableSeat = seats.find((seat) => seat.status === 'AVAILABLE');
+        if (!availableSeat) {
+            setDemoPanels({ error: 'No available seat to demo with right now' });
+            return;
+        }
+        setDemoRunning(true);
+        setDemoPanels({
+            seatNumber: availableSeat.seatNumber,
+            customerA: { status: 'pending' },
+            customerB: { status: 'pending' }
+        });
+
+        const token = localStorage.getItem('token');
+
+        const [resultA, resultB] = await Promise.allSettled([
+            holdSeat(availableSeat.id, token),
+            holdSeat(availableSeat.id, token),
+        ]);
+
+        setDemoPanels({
+            seatNumber: availableSeat.seatNumber,
+            customerA: resultA.status === 'fulfilled'
+                ? { status: 'success' }
+                : { status: 'failed', message: resultA.reason.message },
+            customerB: resultB.status === 'fulfilled'
+                ? { status: 'success' }
+                : { status: 'failed', message: resultB.reason.message },
+        });
+
+        setDemoRunning(false);
+
+        const updated = await getSeats(id);
+        setSeats(updated);
+    }
+
     async function handleConfirm() {
         setError('');
         const token = localStorage.getItem('token');
@@ -95,6 +134,122 @@ function SeatMap() {
                     </button>
                 </div>
             )}
+
+            <div className="mb-6 bg-gray-800 border border-gray-700 rounded-lg p-5">
+                <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-sm font-semibold text-gray-100">
+                        Live Concurrency Demo
+                    </h3>
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={handleConcurrencyDemo}
+                            disabled={demoRunning}
+                            className="text-sm font-medium bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-500 transition-colors disabled:opacity-50"
+                        >
+                            {demoRunning ? 'Booking...' : '⚡ Run Demo'}
+                        </button>
+                        {demoPanels && (
+                            <button
+                                onClick={() => setDemoPanels(null)}
+                                className="text-gray-400 hover:text-gray-100 text-lg px-2"
+                                title="Close demo"
+                            >
+                                ✕
+                            </button>
+                        )}
+                    </div>
+                </div>
+                <p className="text-xs text-gray-500 mb-4">
+                    Fires two real, simultaneous hold requests at the backend for the same
+                    seat — proving the database lock allows exactly one to succeed.
+                </p>
+
+                {demoPanels?.error && (
+                    <p className="text-sm text-red-400">{demoPanels.error}</p>
+                )}
+
+                {demoPanels && !demoPanels.error && (
+                    <>
+                        <p className="text-xs text-gray-400 mb-3">
+                            Two customers both try to book seat{' '}
+                            <strong className="text-gray-200">{demoPanels.seatNumber}</strong>{' '}
+                            at the exact same moment:
+                        </p>
+                        <div className="grid grid-cols-2 gap-4">
+                            {[
+                                { label: 'Customer A', data: demoPanels.customerA },
+                                { label: 'Customer B', data: demoPanels.customerB },
+                            ].map(({ label, data }) => (
+                                <div
+                                    key={label}
+                                    className={`
+              rounded-md border p-4 text-center transition-colors
+              ${data.status === 'pending' ? 'border-gray-600 bg-gray-900' : ''}
+              ${data.status === 'success' ? 'border-green-600 bg-green-900/20' : ''}
+              ${data.status === 'failed' ? 'border-red-600 bg-red-900/20' : ''}
+            `}
+                                >
+                                    <p className="text-sm font-medium text-gray-300 mb-2">{label}</p>
+                                    {data.status === 'pending' && <p className="text-2xl">⏳</p>}
+                                    {data.status === 'success' && (
+                                        <>
+                                            <p className="text-2xl">✅</p>
+                                            <p className="text-xs text-green-400 mt-1">Seat Held</p>
+                                        </>
+                                    )}
+                                    {data.status === 'failed' && (
+                                        <>
+                                            <p className="text-2xl">❌</p>
+                                            <p className="text-xs text-red-400 mt-1">{data.message} ( Held by Another Customer )</p>
+                                        </>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </>
+                )}
+
+                <div className="mt-4 pt-4 border-t border-gray-700">
+                    <button
+                        onClick={() => setShowTechNotes(!showTechNotes)}
+                        className="text-xs font-medium text-purple-400 hover:text-purple-300"
+                    >
+                        {showTechNotes ? '▾ Hide technical notes' : '▸ How does this work?'}
+                    </button>
+
+                    {showTechNotes && (
+                        <div className="mt-3 text-xs text-gray-400 leading-relaxed space-y-3">
+                            <p>
+                                Both requests hit the same backend endpoint at the same time. The
+                                database query locks the seat row before checking its status:
+                            </p>
+                            <pre className="bg-gray-900 border border-gray-700 rounded-md p-3 overflow-x-auto text-gray-300">
+                                {`@Lock(LockModeType.PESSIMISTIC_WRITE)
+@Query("SELECT s FROM Seat s WHERE s.id = :id")
+Optional<Seat> findByIdForUpdate(Long id);`}
+                            </pre>
+                            <p>
+                                The second request physically waits for the first transaction to
+                                commit — so it sees the seat's true, updated status instead of
+                                stale data, and is rejected cleanly.
+                            </p>
+                            <p>
+                                On the frontend, both attempts are fired at once using{' '}
+                                <code className="bg-gray-900 px-1 py-0.5 rounded text-gray-300">
+                                    Promise.allSettled
+                                </code>
+                                , so we can observe both outcomes even though one of them fails:
+                            </p>
+                            <pre className="bg-gray-900 border border-gray-700 rounded-md p-3 overflow-x-auto text-gray-300">
+                                {`const [resultA, resultB] = await Promise.allSettled([
+  holdSeat(seatId, token),
+  holdSeat(seatId, token),
+]);`}
+                            </pre>
+                        </div>
+                    )}
+                </div>
+            </div>
 
             <div className="flex gap-4 mb-4 text-sm text-gray-300">
                 <span className="flex items-center gap-1.5">
