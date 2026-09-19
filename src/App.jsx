@@ -50,7 +50,9 @@ function App() {
     return (
       <div className="min-h-screen bg-gray-900">
         <header className="bg-gray-800 border-b border-gray-700 px-6 py-4 flex items-center justify-between">
-          <h1 className="text-xl font-bold text-gray-100">SeatSure</h1>
+          <Link to="/" className="text-xl font-bold text-gray-100 hover:text-gray-300 transition-colors">
+            SeatSure
+          </Link>
           <div className="flex items-center gap-4">
             {(role === 'ORGANIZER' || role === 'ADMIN') && (
               <Link
