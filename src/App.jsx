@@ -143,7 +143,7 @@ function App() {
               (create events): organizer@seatsure.com / organizer1234
             </p>
             <p className="text-gray-600 pt-1">
-              Only organizers can create events — this mirrors the app's real
+              Only organizers can create events — this ensures
               role-based access control.
             </p>
           </div>
