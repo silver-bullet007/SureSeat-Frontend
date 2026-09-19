@@ -88,7 +88,7 @@ function App() {
         className="absolute top-6 right-6 flex items-center gap-2 text-sm font-medium text-gray-400 hover:text-blue-400 transition-colors"
       >
         <FaLinkedin className="w-5 h-5" />
-        Connect on LinkedIn
+        Built By Lokesh
       </a>
 
       <div className="w-full max-w-sm">
