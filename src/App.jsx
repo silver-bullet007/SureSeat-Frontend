@@ -134,7 +134,9 @@ function App() {
             </button>
           </form>
           <p className="mt-4 text-xs text-gray-500 text-center">
-            Demo account: demo@seatsure.com / demo1234
+            User account: demo@seatsure.com / demo1234
+            <br />
+            Organizer account: organizer@seatsure.com / organizer1234
           </p>
         </div>
 
