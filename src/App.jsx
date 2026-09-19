@@ -133,11 +133,20 @@ function App() {
               Log In
             </button>
           </form>
-          <p className="mt-4 text-xs text-gray-500 text-center">
-            User account: demo@seatsure.com / demo1234
-            <br />
-            Organizer account: organizer@seatsure.com / organizer1234
-          </p>
+          <div className="mt-4 text-xs text-gray-500 text-center space-y-1">
+            <p>
+              <span className="text-gray-400">User account</span>{' '}
+              (browse & book seats): demo@seatsure.com / demo1234
+            </p>
+            <p>
+              <span className="text-gray-400">Organizer account</span>{' '}
+              (create events): organizer@seatsure.com / organizer1234
+            </p>
+            <p className="text-gray-600 pt-1">
+              Only organizers can create events — this mirrors the app's real
+              role-based access control.
+            </p>
+          </div>
         </div>
 
         <div className="mt-6 text-center">
